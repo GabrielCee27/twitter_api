@@ -1,0 +1,22 @@
+{
+  "name": "twitter_api",
+  "version": "1.0.0",
+  "description": "twitter api with express and node",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Gabriel Cisneros",
+  "license": "",
+  "dependencies": {
+    "body-parser": "^1.13.3",
+    "express": "^4.13.2",
+    "express-handlebars": "^2.0.1",
+    "express-session": "^1.11.3",
+    "jsonfile": "^3.0.0",
+    "mkdirp": "^0.5.1",
+    "twitter": "^1.7.1",
+    "xmlhttprequest": "^1.8.0",
+    "yesno": "0.0.1"
+  }
+}
