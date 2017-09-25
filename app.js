@@ -27,7 +27,7 @@ var user_name = config.user_name;
 var fs = require('fs');
 var dir = './data/' + user_name;
 
-//Creates a new directory for user if there is non
+//Creates a new directory for user if there is none
 if(!fs.existsSync(dir)){
   fs.mkdirSync(dir);
 };
