@@ -26,10 +26,21 @@ var user_name = config.user_name;
 
 var fs = require('fs');
 var dir = './data/' + user_name;
+var dir_ids = dir + 'ids.json';
 
 //Creates a new directory for user if there is none
-if(!fs.existsSync(dir)){
+if (!fs.existsSync(dir)) {
   fs.mkdirSync(dir);
+  get_ids(); //since the program is starting from scratch
+};
+
+function append_ids(obj){
+  fs.writeFile(dir_ids, JSON.stringify(obj), function(err){
+      if(err)
+        return console.log(err);
+
+        console.log('File saved');
+  });
 };
 
 //To get a list of ids of users you are following
@@ -41,18 +52,30 @@ function get_ids() {
 
       var body = JSON.parse(response.body); //to make it workable
       var ids = body.ids;
+      append_ids(ids);
 
-      //console.log(ids);
-
-      /*
-      if the user's data base is empty
-        run get_friendships
-
-      else bring user to menu
-
-      */
     }
   });
 };
 
 //get_ids();
+
+/*
+function main_menu(){
+  //1) Run get_friendships
+    //needs to have IDs
+
+  //2) See unfollowers (unfollow menu)
+    //needs to have unfollowers list
+
+  //3) Run get IDs (start all over)
+};
+*/
+
+/*
+function run_it(){
+  //if user's database is empty run get_friendships
+
+  //else bring user to menu
+};
+*/
