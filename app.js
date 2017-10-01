@@ -1,4 +1,4 @@
-console.log("Staring Application");
+console.log("Staring Application...");
 
 var express = require('express');
 var app = express();
@@ -25,21 +25,27 @@ var client = new twitter({
 var user_name = config.user_name;
 
 var fs = require('fs');
-var dir = './data/' + user_name;
-var dir_ids = dir + 'ids.json';
+var dir_file = './user_data/' + user_name;
+var dir_data = dir_file + '/data.json';
 
-//Creates a new directory for user if there is none
-if (!fs.existsSync(dir)) {
-  fs.mkdirSync(dir);
-  get_ids(); //since the program is starting from scratch
+var data = {
 };
 
-function append_ids(obj){
-  fs.writeFile(dir_ids, JSON.stringify(obj), function(err){
+//Creates a new directory for user if there is none
+if (!fs.existsSync(dir_file)) {
+  fs.mkdirSync(dir_file);
+  get_ids(); //since the program is starting from scratch
+}
+else{
+  console.log('User file is already made');
+};
+
+function update_data(obj){
+  fs.writeFile(dir_data, JSON.stringify(obj), function(err){
       if(err)
         return console.log(err);
 
-        console.log('File saved');
+        console.log('File saved in ' + dir_data);
   });
 };
 
@@ -51,8 +57,10 @@ function get_ids() {
     else { //callback
 
       var body = JSON.parse(response.body); //to make it workable
-      var ids = body.ids;
-      append_ids(ids);
+      data.ids = body.ids;
+      //console.log(data.ids);
+
+      update_data(data);
 
       //get_friendships
     }
