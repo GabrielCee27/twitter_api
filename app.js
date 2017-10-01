@@ -54,6 +54,7 @@ function get_ids() {
       var ids = body.ids;
       append_ids(ids);
 
+      //get_friendships
     }
   });
 };
