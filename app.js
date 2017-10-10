@@ -38,6 +38,7 @@ if (!fs.existsSync(dir_file)) {
 }
 else{
   console.log('User file is already made');
+
 };
 
 function update_data(obj){
