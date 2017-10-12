@@ -1,4 +1,4 @@
-console.log("Staring Application");
+console.log("Staring Application...");
 
 var express = require('express');
 var app = express();
@@ -25,21 +25,27 @@ var client = new twitter({
 var user_name = config.user_name;
 
 var fs = require('fs');
-var dir = './data/' + user_name;
-var dir_ids = dir + 'ids.json';
+var dir_file = './user_data/' + user_name;
+var dir_data = dir_file + '/data.json';
 
-//Creates a new directory for user if there is none
-if (!fs.existsSync(dir)) {
-  fs.mkdirSync(dir);
-  get_ids(); //since the program is starting from scratch
+var data = {
 };
 
-function append_ids(obj){
-  fs.writeFile(dir_ids, JSON.stringify(obj), function(err){
+//Creates a new directory for user if there is none
+if (!fs.existsSync(dir_file)) {
+  fs.mkdirSync(dir_file);
+  get_ids(); //since the program is starting from scratch
+}
+else{
+  console.log('User file for ' + user_name + ' is already made.');
+};
+
+function update_data(obj){
+  fs.writeFile(dir_data, JSON.stringify(obj), function(err){
       if(err)
         return console.log(err);
 
-        console.log('File saved');
+        console.log('File saved in ' + dir_data);
   });
 };
 
@@ -51,26 +57,38 @@ function get_ids() {
     else { //callback
 
       var body = JSON.parse(response.body); //to make it workable
-      var ids = body.ids;
-      append_ids(ids);
+      data.ids = body.ids;
+      //console.log(data.ids);
 
+      update_data(data); //change to update_ids?
+
+      //get_friendships
     }
   });
 };
 
 //get_ids();
 
-/*
+
 function main_menu(){
   //1) Run get_friendships
     //needs to have IDs
+
+  console.log("");
+  console.log("---------Menu---------");
+  console.log("1) Get Friendships");
+  //console.log("2) See unfollowers");
+  //console.log("3) Get IDs");
+  console.log("");
+  console.log(":");
 
   //2) See unfollowers (unfollow menu)
     //needs to have unfollowers list
 
   //3) Run get IDs (start all over)
 };
-*/
+
+main_menu();
 
 /*
 function run_it(){
