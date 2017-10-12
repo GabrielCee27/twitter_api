@@ -37,8 +37,7 @@ if (!fs.existsSync(dir_file)) {
   get_ids(); //since the program is starting from scratch
 }
 else{
-  console.log('User file is already made');
-
+  console.log('User file for ' + user_name + ' is already made.');
 };
 
 function update_data(obj){
@@ -61,7 +60,7 @@ function get_ids() {
       data.ids = body.ids;
       //console.log(data.ids);
 
-      update_data(data);
+      update_data(data); //change to update_ids?
 
       //get_friendships
     }
@@ -70,17 +69,26 @@ function get_ids() {
 
 //get_ids();
 
-/*
+
 function main_menu(){
   //1) Run get_friendships
     //needs to have IDs
+
+  console.log("");
+  console.log("---------Menu---------");
+  console.log("1) Get Friendships");
+  //console.log("2) See unfollowers");
+  //console.log("3) Get IDs");
+  console.log("");
+  console.log(":");
 
   //2) See unfollowers (unfollow menu)
     //needs to have unfollowers list
 
   //3) Run get IDs (start all over)
 };
-*/
+
+main_menu();
 
 /*
 function run_it(){
