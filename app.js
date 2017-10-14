@@ -66,7 +66,6 @@ if (!fs.existsSync(dir_data)) {
 
 //Returns JSON object from data file.
 function load_data() {
-  //returns an object from json file
   return JSON.parse(fs.readFileSync(dir_data, 'utf8'));
 };
 
@@ -112,22 +111,45 @@ function arr_of_friends(start) {
   return arr;
 };
 
+function append_unfollowers(arr){
+  var temp_obj = load_data();
+
+  for(var i=0; i < arr.length; i++){
+    temp_obj.unfollowers.push(arr[i]);
+  };
+
+  //console.log("temp_obj.unfollowers: " + temp_obj.unfollowers);
+
+  fs.writeFile(dir_data, JSON.stringify(temp_obj), function(err) {
+    if (err)
+      return console.log(err);
+
+    console.log('Appended unfollowers to data file');
+  });
+
+};
 
 //if user does not follow back, append to unfollowers
 function check_connections(body) {
+
+  var arr = [];
+
   for (var j = 0; j < body.length; j++) {
     var add = true;
     for (var k = 0; k < body[j].connections.length; k++) {
       if (body[j].connections[k] == 'followed_by') {
         add = false;
-        console.log(body[j].screen_name + " does follow back");
       }
-    }
+    };
 
     if (add) {
       console.log(body[j].screen_name + " does not follow back");
+      arr.push(body[j].screen_name);
     }
-  }
+
+  };
+  console.log("arr: " + arr);
+  append_unfollowers(arr);
 };
 
 
@@ -136,41 +158,50 @@ function check_connections(body) {
 function get_friendships() {
   console.log("Getting friendships...");
 
-  console.log("length: " + data_obj.friends.length);
+  //console.log("length: " + data_obj.friends.length);
   var loops = data_obj.friends.length / 100;
 
-  /*
   for (var i = 0; i < loops; i++) {
     console.log("i: " + i);
-    arr_of_friends(i);
+    var param = {
+      user_id: arr_of_friends(i).toString()
+    };
+
+    client.get('friendships/lookup', param, function(error, tweet, response) {
+      if (error){
+        return console.log(error);
+      }
+      else {
+        check_connections(JSON.parse(response.body));
+      }
+    });
   }
-  */
 
   /*
   var param = {
     user_id: arr_of_friends(0).toString()
   };
-  */
 
   var param = {
-    user_id: "158414847"
+    user_id: "158414847,142839300"
   }
 
   client.get('friendships/lookup', param, function(error, tweet, response) {
-    if (error)
+    if (error){
       return console.log(error);
-
-    check_connections(JSON.parse(response.body));
-
+    }
+    else {
+      check_connections(JSON.parse(response.body));
+    }
   });
-
+  */
 
 };
 
 get_friendships();
 
 
-function main_menu(){
+function menu(){
   //1) Run get_friendships
     //needs to have friends
 
