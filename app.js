@@ -1,4 +1,6 @@
+
 console.log("Setting up application...");
+
 
 var express = require('express');
 var app = express();
@@ -167,17 +169,25 @@ function get_friendships() {
 
 get_friendships();
 
-/*
+
 function main_menu(){
   //1) Run get_friendships
     //needs to have friends
+
+  console.log("");
+  console.log("---------Menu---------");
+  console.log("1) Get Friendships");
+  //console.log("2) See unfollowers");
+  //console.log("3) Get IDs");
+  console.log("");
+  console.log(":");
 
   //2) See unfollowers (unfollow menu)
     //needs to have unfollowers list
 
   //3) Run get friends (start all over)
 };
-*/
+
 
 /*
 function run_it(){
