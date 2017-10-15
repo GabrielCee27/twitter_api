@@ -36,12 +36,11 @@ var dir_data = './user_data/' + user_name + '_data.json';
 console.log("Set up complete.");
 ///////////////////////////////////////////////////////////////////////////////
 
-function user_obj_constructor(name, bool){
+function user_obj_constructor(name, bool = null){
   var obj = {
     'screen_name' : name,
     'verified' : bool
   };
-  
   return obj;
 };
 
@@ -204,27 +203,6 @@ function check_connections(body) {
 };
 
 /* Original function
-function append_unfollowers(arr){
-  console.log("Appending unfollowers...");
-
-  var temp_obj = load_data();
-
-  for(var i=0; i < arr.length; i++){
-    temp_obj.unfollowers.push(arr[i]);
-  };
-
-  //console.log("temp_obj.unfollowers: " + temp_obj.unfollowers);
-
-  fs.writeFile(dir_data, JSON.stringify(temp_obj), function(err) {
-    if (err)
-      return console.log(err);
-
-    console.log('Appended unfollowers to data file');
-  });
-
-};
-*/
-
 function append_unfollowers(arr) {
   console.log("Appending unfollowers...");
 
@@ -242,8 +220,28 @@ function append_unfollowers(arr) {
 
     console.log('Appended unfollowers to data file');
   });
+};
+*/
 
-  //write_data(data_obj, 'Appended unfollowers to data file');
+
+function append_unfollowers(arr) {
+  console.log("Appending unfollowers...");
+
+  for (var i = 0; i < arr.length; i++) {
+    data_obj.unfollowers.push(user_obj_constructor(arr[i]));
+  };
+  console.log("data_obj.unfollowers updated.");
+  //console.log("data_obj: " + JSON.stringify(data_obj));
+
+  //console.log("temp_obj.unfollowers: " + temp_obj.unfollowers);
+
+  fs.writeFile(dir_data, JSON.stringify(data_obj), function(err) {
+    if (err)
+      return console.log(err);
+
+    console.log('Appended unfollowers to data file');
+  });
+
 };
 
 
