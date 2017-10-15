@@ -1,4 +1,3 @@
-
 console.log("Setting up application...");
 
 
@@ -37,6 +36,25 @@ var dir_data = './user_data/' + user_name + '_data.json';
 console.log("Set up complete.");
 ///////////////////////////////////////////////////////////////////////////////
 
+//Returns JSON object from data file.
+function load_data() {
+  return JSON.parse(fs.readFileSync(dir_data, 'utf8'));
+};
+
+function write_data(data_obj, message = 'Data file updated') {
+  fs.writeFile(dir_data, JSON.stringify(data_obj), function(err) {
+    if (err)
+      return console.log(err);
+
+    console.log(message);
+  });
+};
+
+function print_data(message = '') {
+  console.log("Data file " + message + ":");
+  console.log(fs.readFileSync(dir_data, 'utf8'));
+};
+
 //Creates a new file for user if there is none.
 if (!fs.existsSync(dir_data)) {
   //initiate folder
@@ -68,23 +86,17 @@ if (!fs.existsSync(dir_data)) {
   }
 }
 
-//Returns JSON object from data file.
-function load_data() {
-  return JSON.parse(fs.readFileSync(dir_data, 'utf8'));
-};
+//To get an array of friends of users you are following and updates data file
+function get_friends_ids() {
+  console.log("Getting friends...");
+  client.get('friends/ids', function(error, tweets, response) {
+    if (error) throw error;
+    else { //callback
 
-function write_data(data_obj, message = 'Data file updated'){
-  fs.writeFile(dir_data, JSON.stringify(data_obj), function(err) {
-    if (err)
-      return console.log(err);
-
-    console.log(message);
+      var body = JSON.parse(response.body); //to make it workable
+      update_friends(body.ids);
+    }
   });
-};
-
-function print_data(message = ''){
-  console.log("Data file " + message + ":");
-  console.log(fs.readFileSync(dir_data, 'utf8'));
 };
 
 function update_friends(array) {
@@ -99,102 +111,6 @@ function update_friends(array) {
     get_friendships();
   });
 };
-
-//To get an array of friends of users you are following and updates data file
-function get_friends_ids() {
-  console.log("Getting friends...");
-  client.get('friends/ids', function(error, tweets, response) {
-    if (error) throw error;
-    else { //callback
-
-      var body = JSON.parse(response.body); //to make it workable
-      update_friends(body.ids);
-    }
-  });
-};
-
-//returns an array of 100 friend ids
-function arr_of_friends(start) {
-  var arr = [];
-  var length = data_obj.friends.length;
-
-  for (var i = start * 100;
-    (i < length) && (i < ((start * 100) + 100)); i++) {
-    arr.push(data_obj.friends[i]);
-  }
-  console.log('arr.length: ' + arr.length);
-
-  return arr;
-};
-
-
-/* Original function
-function append_unfollowers(arr){
-  console.log("Appending unfollowers...");
-
-  var temp_obj = load_data();
-
-  for(var i=0; i < arr.length; i++){
-    temp_obj.unfollowers.push(arr[i]);
-  };
-
-  //console.log("temp_obj.unfollowers: " + temp_obj.unfollowers);
-
-  fs.writeFile(dir_data, JSON.stringify(temp_obj), function(err) {
-    if (err)
-      return console.log(err);
-
-    console.log('Appended unfollowers to data file');
-  });
-
-};
-*/
-
-function append_unfollowers(arr){
-  console.log("Appending unfollowers...");
-
-  for(var i=0; i < arr.length; i++){
-    data_obj.unfollowers.push(arr[i]);
-  };
-  console.log("data_obj.unfollowers updated.");
-  //console.log("data_obj: " + JSON.stringify(data_obj));
-
-  //console.log("temp_obj.unfollowers: " + temp_obj.unfollowers);
-
-  fs.writeFile(dir_data, JSON.stringify(data_obj), function(err) {
-    if (err)
-      return console.log(err);
-
-    console.log('Appended unfollowers to data file');
-  });
-
-  //write_data(data_obj, 'Appended unfollowers to data file');
-};
-
-//if user does not follow back, append to unfollowers
-function check_connections(body) {
-console.log("Checking connections...");
-
-  var arr = [];
-
-  for (var j = 0; j < body.length; j++) {
-    var add = true;
-    for (var k = 0; k < body[j].connections.length; k++) {
-      if (body[j].connections[k] == 'followed_by') {
-        add = false;
-      }
-    };
-
-    if(add){
-      //console.log(body[j].screen_name + " does not follow back");
-      arr.push(body[j].screen_name);
-    }
-
-  };
-  //console.log("arr: " + arr);
-  append_unfollowers(arr); //sends an array of screen names that don't follow back
-};
-
 
 //Friends should be populated
 //get_friendships will populate database with names of users who don't follow back
@@ -211,10 +127,9 @@ function get_friendships() {
     };
 
     client.get('friendships/lookup', param, function(error, tweet, response) {
-      if (error){
+      if (error) {
         return console.log(error);
-      }
-      else {
+      } else {
         check_connections(JSON.parse(response.body));
       }
     });
@@ -241,10 +156,91 @@ function get_friendships() {
 
 };
 
+//returns an array of 100 friend ids
+function arr_of_friends(start) {
+  var arr = [];
+  var length = data_obj.friends.length;
 
-function menu(){
+  for (var i = start * 100;
+    (i < length) && (i < ((start * 100) + 100)); i++) {
+    arr.push(data_obj.friends[i]);
+  }
+  console.log('arr.length: ' + arr.length);
+
+  return arr;
+};
+
+//if user does not follow back, append to unfollowers
+function check_connections(body) {
+  console.log("Checking connections...");
+
+  var arr = [];
+
+  for (var j = 0; j < body.length; j++) {
+    var add = true;
+    for (var k = 0; k < body[j].connections.length; k++) {
+      if (body[j].connections[k] == 'followed_by') {
+        add = false;
+      }
+    };
+
+    if (add) {
+      //console.log(body[j].screen_name + " does not follow back");
+      arr.push(body[j].screen_name);
+    }
+
+  };
+  //console.log("arr: " + arr);
+  append_unfollowers(arr); //sends an array of screen names that don't follow back
+};
+
+/* Original function
+function append_unfollowers(arr){
+  console.log("Appending unfollowers...");
+
+  var temp_obj = load_data();
+
+  for(var i=0; i < arr.length; i++){
+    temp_obj.unfollowers.push(arr[i]);
+  };
+
+  //console.log("temp_obj.unfollowers: " + temp_obj.unfollowers);
+
+  fs.writeFile(dir_data, JSON.stringify(temp_obj), function(err) {
+    if (err)
+      return console.log(err);
+
+    console.log('Appended unfollowers to data file');
+  });
+
+};
+*/
+
+function append_unfollowers(arr) {
+  console.log("Appending unfollowers...");
+
+  for (var i = 0; i < arr.length; i++) {
+    data_obj.unfollowers.push(arr[i]);
+  };
+  console.log("data_obj.unfollowers updated.");
+  //console.log("data_obj: " + JSON.stringify(data_obj));
+
+  //console.log("temp_obj.unfollowers: " + temp_obj.unfollowers);
+
+  fs.writeFile(dir_data, JSON.stringify(data_obj), function(err) {
+    if (err)
+      return console.log(err);
+
+    console.log('Appended unfollowers to data file');
+  });
+
+  //write_data(data_obj, 'Appended unfollowers to data file');
+};
+
+
+function menu() {
   //1) Run get_friendships
-    //needs to have friends
+  //needs to have friends
 
   console.log("");
   console.log("---------Menu---------");
@@ -255,7 +251,7 @@ function menu(){
   console.log(":");
 
   //2) See unfollowers (unfollow menu)
-    //needs to have unfollowers list
+  //needs to have unfollowers list
 
   //3) Run get friends (start all over)
 };
