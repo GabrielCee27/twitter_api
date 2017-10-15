@@ -36,6 +36,15 @@ var dir_data = './user_data/' + user_name + '_data.json';
 console.log("Set up complete.");
 ///////////////////////////////////////////////////////////////////////////////
 
+function user_obj_constructor(name, bool){
+  var obj = {
+    'screen_name' : name,
+    'verified' : bool
+  };
+  
+  return obj;
+};
+
 //Returns JSON object from data file.
 function load_data() {
   return JSON.parse(fs.readFileSync(dir_data, 'utf8'));
