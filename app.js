@@ -40,14 +40,9 @@ console.log("Set up complete.");
 //Creates a new file for user if there is none.
 if (!fs.existsSync(dir_data)) {
   //initiate folder
-  fs.writeFile(dir_data, JSON.stringify(data_obj), function(err) {
-    if (err)
-      return console.log(err);
+  write_data( data_obj, "New data file created and initiated.");
 
-    console.log("New data file created and initiated.");
-  });
-
-  get_friends_ids(); //since the program is starting from scratch
+  //get_friends_ids(); //since the program is starting from scratch
 } else {
   console.log("Data file already exists.");
 
@@ -55,18 +50,29 @@ if (!fs.existsSync(dir_data)) {
   var temp_obj = load_data();
   //console.log(obj.friends.length);
   if (temp_obj.friends.length > 0) {
-    console.log("Friends is not empty");
+    console.log("Data file, friends is populated.");
     data_obj.friends = temp_obj.friends;
     //console.log(data_obj.friends);
   } else {
-    console.log("Friends is empty");
-    get_friends_ids();
+    console.log("Data file, friends is not populated.");
+    //get_friends_ids();
   }
 }
 
 //Returns JSON object from data file.
 function load_data() {
+  console.log(JSON.parse(fs.readFileSync(dir_data, 'utf8')));
   return JSON.parse(fs.readFileSync(dir_data, 'utf8'));
+};
+
+function write_data(data_obj, message = 'Data file updated'){
+
+  fs.writeFile(dir_data, JSON.stringify(data_obj), function(err) {
+    if (err)
+      return console.log(err);
+
+    console.log(message);
+  });
 };
 
 //Replaces populated or null friends with a new array
@@ -76,12 +82,8 @@ function update_friends(array) {
   var temp_obj = load_data();
   temp_obj.friends = array;
 
-  fs.writeFile(dir_data, JSON.stringify(temp_obj), function(err) {
-    if (err)
-      return console.log(err);
+  write_data(temp_obj, 'Data file updated with new friend ids.');
 
-    console.log('Data file updated with new friends');
-  });
 };
 
 //To get an array of friends of users you are following and updates data file
@@ -112,6 +114,8 @@ function arr_of_friends(start) {
 };
 
 function append_unfollowers(arr){
+  console.log("Appending unfollowers...");
+
   var temp_obj = load_data();
 
   for(var i=0; i < arr.length; i++){
@@ -131,6 +135,7 @@ function append_unfollowers(arr){
 
 //if user does not follow back, append to unfollowers
 function check_connections(body) {
+console.log("Checking connections...");
 
   var arr = [];
 
@@ -143,13 +148,13 @@ function check_connections(body) {
     };
 
     if (add) {
-      console.log(body[j].screen_name + " does not follow back");
+      //console.log(body[j].screen_name + " does not follow back");
       arr.push(body[j].screen_name);
     }
 
   };
-  console.log("arr: " + arr);
-  append_unfollowers(arr);
+  //console.log("arr: " + arr);
+  append_unfollowers(arr); //sends an array of screen names that don't follow back
 };
 
 
@@ -197,8 +202,6 @@ function get_friendships() {
   */
 
 };
-
-get_friendships();
 
 
 function menu(){
