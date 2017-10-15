@@ -87,18 +87,6 @@ function print_data(message = ''){
   console.log(fs.readFileSync(dir_data, 'utf8'));
 };
 
-/* Original function
-//Replaces populated or null friends with a new array
-function update_friends(array) {
-  //Do I need to carry over existing data for this function?
-
-  var temp_obj = load_data();
-  temp_obj.friends = array;
-
-  write_data(temp_obj, 'Data file updated with new friend ids.');
-};
-*/
-
 function update_friends(array) {
   data_obj.friends = array;
   console.log("data_obj.friends is updated with ids.");
@@ -110,8 +98,6 @@ function update_friends(array) {
     console.log('Data file updated with new friend ids.');
     get_friendships();
   });
-
-  //write_data(data_obj, 'Data file updated with new friend ids.');
 };
 
 //To get an array of friends of users you are following and updates data file
@@ -175,8 +161,14 @@ function append_unfollowers(arr){
 
   //console.log("temp_obj.unfollowers: " + temp_obj.unfollowers);
 
-  write_data(data_obj, 'Appended unfollowers to data file');
+  fs.writeFile(dir_data, JSON.stringify(data_obj), function(err) {
+    if (err)
+      return console.log(err);
 
+    console.log('Appended unfollowers to data file');
+  });
+
+  //write_data(data_obj, 'Appended unfollowers to data file');
 };
 
 //if user does not follow back, append to unfollowers
@@ -228,7 +220,7 @@ function get_friendships() {
     });
   }
 
-  /*
+  /* Testing
   var param = {
     user_id: arr_of_friends(0).toString()
   };
