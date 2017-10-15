@@ -42,26 +42,29 @@ if (!fs.existsSync(dir_data)) {
   //initiate folder
   write_data( data_obj, "New data file created and initiated.");
 
-  //get_friends_ids(); //since the program is starting from scratch
+  get_friends_ids(); //since the program is starting from scratch
 } else {
   console.log("Data file already exists.");
 
   //check if friends is populated
   var temp_obj = load_data();
+
+  print_data();
+
   //console.log(obj.friends.length);
   if (temp_obj.friends.length > 0) {
     console.log("Data file, friends is populated.");
     data_obj.friends = temp_obj.friends;
-    //console.log(data_obj.friends);
+    //console.log("data_obj: " + JSON.stringify(data_obj));
+    
   } else {
     console.log("Data file, friends is not populated.");
-    //get_friends_ids();
+    get_friends_ids();
   }
 }
 
 //Returns JSON object from data file.
 function load_data() {
-  console.log(JSON.parse(fs.readFileSync(dir_data, 'utf8')));
   return JSON.parse(fs.readFileSync(dir_data, 'utf8'));
 };
 
@@ -75,6 +78,12 @@ function write_data(data_obj, message = 'Data file updated'){
   });
 };
 
+function print_data(message = ''){
+  console.log("Data file " + message + ":");
+  console.log(fs.readFileSync(dir_data, 'utf8'));
+};
+
+/* Original function
 //Replaces populated or null friends with a new array
 function update_friends(array) {
   //Do I need to carry over existing data for this function?
@@ -83,7 +92,14 @@ function update_friends(array) {
   temp_obj.friends = array;
 
   write_data(temp_obj, 'Data file updated with new friend ids.');
+};
+*/
 
+function update_friends(array) {
+
+  data_obj.friends = array;
+  console.log("data_obj.friends is updated with ids.");
+  write_data(data_obj, 'Data file updated with new friend ids.');
 };
 
 //To get an array of friends of users you are following and updates data file
