@@ -36,10 +36,10 @@ var dir_data = './user_data/' + user_name + '_data.json';
 console.log("Set up complete.");
 ///////////////////////////////////////////////////////////////////////////////
 
-function user_obj_constructor(name, bool = null){
+function user_obj_constructor(name, bool = null) {
   var obj = {
-    'screen_name' : name,
-    'verified' : bool
+    'screen_name': name,
+    'verified': bool
   };
   return obj;
 };
@@ -85,9 +85,18 @@ if (!fs.existsSync(dir_data)) {
   if (temp_obj.friends.length > 0) {
     console.log("Data file, friends is populated.");
     data_obj.friends = temp_obj.friends;
+    console.log("data_obj.friends is updated");
     //console.log("data_obj: " + JSON.stringify(data_obj));
+    if (temp_obj.unfollowers.length > 0) {
+      console.log("Data file, unfollowers is populated");
+      data_obj.unfollowers = temp_obj.unfollowers;
+      console.log("data_obj.unfollowers is updated.");
+      get_users_lookup();
+    } else {
+      console.log("Data files, unfollowers is not populated");
+      get_friendships();
+    }
 
-    get_friendships();
   } else {
     console.log("Data file, friends is not populated.");
     get_friends_ids();
@@ -202,35 +211,13 @@ function check_connections(body) {
   append_unfollowers(arr); //sends an array of screen names that don't follow back
 };
 
-/* Original function
-function append_unfollowers(arr) {
-  console.log("Appending unfollowers...");
-
-  for (var i = 0; i < arr.length; i++) {
-    data_obj.unfollowers.push(arr[i]);
-  };
-  console.log("data_obj.unfollowers updated.");
-  //console.log("data_obj: " + JSON.stringify(data_obj));
-
-  //console.log("temp_obj.unfollowers: " + temp_obj.unfollowers);
-
-  fs.writeFile(dir_data, JSON.stringify(data_obj), function(err) {
-    if (err)
-      return console.log(err);
-
-    console.log('Appended unfollowers to data file');
-  });
-};
-*/
-
-
 function append_unfollowers(arr) {
   console.log("Appending unfollowers...");
 
   for (var i = 0; i < arr.length; i++) {
     data_obj.unfollowers.push(user_obj_constructor(arr[i]));
   };
-  console.log("data_obj.unfollowers updated.");
+  //console.log("data_obj.unfollowers updated.");
   //console.log("data_obj: " + JSON.stringify(data_obj));
 
   //console.log("temp_obj.unfollowers: " + temp_obj.unfollowers);
@@ -239,35 +226,72 @@ function append_unfollowers(arr) {
     if (err)
       return console.log(err);
 
-    console.log('Appended unfollowers to data file');
+    //console.log('Appended unfollowers to data file');
   });
 
 };
 
+function get_users_lookup(i=0) {
+  console.log("Looking up users...");
+  temp_obj = load_data();
+  console.log("data file unfollowers length: " + temp_obj.unfollowers.length);
 
-function menu() {
-  //1) Run get_friendships
-  //needs to have friends
+  console.log("Loop #: " + i);
+  var param = {
+    screen_name: arr_of_unfollowers(i).toString()
+  };
 
-  console.log("");
-  console.log("---------Menu---------");
-  console.log("1) Get Friendships");
-  //console.log("2) See unfollowers");
-  //console.log("3) Get IDs");
-  console.log("");
-  console.log(":");
+  client.get('users/lookup', param, function(error, tweet, response) {
+    if (error) {
+      return console.log(error);
+    } else {
+      check_if_verified(JSON.parse(response.body), i);
 
-  //2) See unfollowers (unfollow menu)
-  //needs to have unfollowers list
-
-  //3) Run get friends (start all over)
+      if(i == (Math.floor(temp_obj.unfollowers.length / 100)) ){
+        console.log("End of recursion.");
+        write_data(data_obj);
+      }
+      else {
+        get_users_lookup(i + 1);
+      }
+    }
+  });
 };
 
+function arr_of_unfollowers(start) {
+  var arr = [];
+  var temp_obj = load_data();
+  var length = temp_obj.unfollowers.length; //254
 
-/*
-function run_it(){
-  //if user's database is empty run get_friendships
+  for (var i = start * 100;
+    (i < length) && (i < ((start * 100) + 100)); i++) {
+    arr.push(temp_obj.unfollowers[i].screen_name);
+  }
 
-  //else bring user to menu
+  console.log("array being sent: " + arr);
+  console.log('arr.length: ' + arr.length);
+
+  return arr;
 };
-*/
+
+function check_if_verified(body, start) {
+  console.log("Checking if verified...");
+
+  var l = start * 100; //
+
+  console.log("l: " + l);
+  console.log("body.length" + body.length);
+
+  for (var j = 0; j < body.length; j++) {
+    if (body[j].verified == true) {
+      console.log(body[j].screen_name + " is verified.");
+      data_obj.unfollowers[l] = user_obj_constructor(body[j].screen_name, true);
+    } else {
+      data_obj.unfollowers[l] = user_obj_constructor(body[j].screen_name, false);
+    }
+    l += 1;
+  };
+
+  console.log("data_obj.unfollowers: " + JSON.stringify(data_obj.unfollowers));
+  console.log("data_obj.unfollowers.length: " + data_obj.unfollowers.length);
+};
